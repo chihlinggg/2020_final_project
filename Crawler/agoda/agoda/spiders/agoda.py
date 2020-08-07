@@ -43,7 +43,7 @@ class AgodaSpider(scrapy.Spider):
         
         # 住客地點
         if comment.find('span',class_='reviewer-name'):    
-          if '（' in comment.find('span',class_='reviewer-name').text.strip()
+          if '（' in comment.find('span',class_='reviewer-name').text.strip():
             customer_loc = comment.find('span',class_='reviewer-name').text.strip().split('（')[1][2:-1]
           else:
             customer_loc = ''
@@ -107,8 +107,8 @@ class AgodaSpider(scrapy.Spider):
         else:
           approve_num = ''
                 
-        data = MyprojectItem()
-        data['hotelId'] = self.id
+        data = AgodaItem()
+        data['Hotel_id'] = self.id
         data['Star'] = star
         data['Customer_location'] = customer_loc
         data['Trip_type'] = trip_type
