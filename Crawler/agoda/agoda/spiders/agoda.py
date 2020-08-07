@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from agoda.items import AgodaItem
+from agoda.items import AgodaItem, TimeItem
 import scrapy
 import re
 from bs4 import BeautifulSoup
@@ -108,16 +108,21 @@ class AgodaSpider(scrapy.Spider):
           approve_num = ''
                 
         data = AgodaItem()
-        data['Hotel_id'] = self.id
-        data['Star'] = star
-        data['Customer_location'] = customer_loc
-        data['Trip_type'] = trip_type
-        data['Room_type'] = room_type
-        data['Living_date'] = living_date
-        data['Comment_title'] = comment_title
-        data['Comment_body'] = comment_body
-        data['Comment_date'] = comment_date
-        data['Response_body'] = response_body
-        data['Response_time'] = response_time
-        data['Approve_number'] = approve_num
+
+        time_data = TimeItem()
+        time_data['comment'] = comment_date
+        time_data['checkin'] = living_date
+        time_data['response'] = response_time
+
+        data['hotel_id'] = self.id
+        data['locale'] = customer_loc
+        data['approve_number'] = approve_num
+        data['rating'] = star
+        data['title'] = comment_title
+        data['text'] = comment_body
+        data['time'] = time_data
+        data['trip_type'] = trip_type
+        data['room_type'] = room_type
+        data['response_body'] = response_body
+        
         yield data

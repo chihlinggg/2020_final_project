@@ -7,7 +7,7 @@
 
 import os
 import json
-
+from agoda.items import AgodaItem, TimeItem
 from pathlib import Path
 from datetime import datetime
 class AgodaPipeline(object):
@@ -36,7 +36,15 @@ class JSONPipeline(object):
         self._first_item = True
 
     def process_item(self, item, spider):
+
+        # 不知道要不要 但這是轉時間的
         
+        #if isinstance(item,TimeItem):
+        #    self.exporter.export_item(item)
+        #    return item
+        if isinstance(item, TimeItem):
+            return item.__str__()
+    
         # 把資料轉成字典格式並寫入文件中
         if not isinstance(item, dict):
             item = dict(item)

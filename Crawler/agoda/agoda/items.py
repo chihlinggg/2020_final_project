@@ -9,15 +9,19 @@ import scrapy
 
 
 class AgodaItem(scrapy.Item):
-    Hotel_id = scrapy.Field()
-    Star = scrapy.Field()
-    Customer_location = scrapy.Field()
-    Trip_type = scrapy.Field()
-    Room_type = scrapy.Field()
-    Living_date = scrapy.Field()
-    Comment_title = scrapy.Field()
-    Comment_body = scrapy.Field()
-    Comment_date = scrapy.Field()
-    Response_body = scrapy.Field()
-    Response_time = scrapy.Field()
-    Approve_number = scrapy.Field()
+    hotel_id = scrapy.Field()
+    locale = scrapy.Field()
+    approve_number = scrapy.Field()
+    rating = scrapy.Field()
+    title = scrapy.Field()
+    text = scrapy.Field()
+    time = scrapy.Field()
+    trip_type = scrapy.Field()
+    room_type = scrapy.Field()
+    response_body = scrapy.Field()
+    
+
+class TimeItem(scrapy.Item):
+    comment = scrapy.Field()
+    checkin = scrapy.Field()
+    response = scrapy.Field()
