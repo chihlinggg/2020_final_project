@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from agoda.items import AgodaItem, TimeItem
+from agoda.items import AgodaItem
 import scrapy
 import re
 from bs4 import BeautifulSoup
@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlparse
 from pathlib import Path
 import time
 import json
+import math
 
 class AgodaSpider(scrapy.Spider):
     name = 'agoda'
@@ -20,11 +21,17 @@ class AgodaSpider(scrapy.Spider):
       super().__init__()
 
     def start_requests(self):
-      for page in range(1,2):
-        self.payload = "{{\"hotelId\":{id},\"providerId\":332,\"demographicId\":0,\"page\":{page},\"pageSize\":20,\"sorting\":1,\"providerIds\":332,\"isReviewPage\":false,\"isCrawlablePage\":true,\"filters\":{{\"language\":[],\"room\":[]}},\"searchKeyword\":\"\",\"searchFilters\":[]}}".format(id=self.id,page=page)
-        yield scrapy.Request(url=self.start_urls, callback=self.parse, method='POST', headers=self.headers, body=self.payload)
+      self.payload = "{{\"hotelId\":{id},\"providerId\":332,\"demographicId\":0,\"page\":1,\"pageSize\":20,\"sorting\":1,\"providerIds\":332,\"isReviewPage\":false,\"isCrawlablePage\":true,\"filters\":{{\"language\":[],\"room\":[]}},\"searchKeyword\":\"\",\"searchFilters\":[]}}".format(id=self.id)
+      yield scrapy.Request(url=self.start_urls, callback=self.parse, method='POST', headers=self.headers, body=self.payload)
         
     def parse(self, response):
+      soup = BeautifulSoup(response.text, 'lxml')
+      last_page = math.ceil(int(soup.find('div',class_='hotelreview-detail-item').get('data-totalindex'))/20)
+      for page in range(1,last_page+1):
+        self.payload = "{{\"hotelId\":{id},\"providerId\":332,\"demographicId\":0,\"page\":{page},\"pageSize\":20,\"sorting\":1,\"providerIds\":332,\"isReviewPage\":false,\"isCrawlablePage\":true,\"filters\":{{\"language\":[],\"room\":[]}},\"searchKeyword\":\"\",\"searchFilters\":[]}}".format(id=self.id,page=page)
+        yield scrapy.Request(url=self.start_urls, callback=self.parse_article, method='POST', headers=self.headers, body=self.payload)
+    
+    def parse_article(self, response):
       # 假設網頁回應不是 200 OK 的話, 我們視為傳送請求失敗
       if response.status != 200:
         print('Error - {} is not available to access'.format(response.url))
@@ -34,7 +41,11 @@ class AgodaSpider(scrapy.Spider):
       comments = soup.find_all(class_='sub-section individual-review-item')
 
       for comment in comments:
-            
+        
+        if comment.get('data-id'):
+          comment_id = comment.get('data-id')
+        else:
+          comment_id = ''
         # 星星
         if comment.find('span',attrs={'data-selenium':'individual-review-rate'}):
           star = comment.find('span',attrs={'data-selenium':'individual-review-rate'}).text.strip()
@@ -109,20 +120,19 @@ class AgodaSpider(scrapy.Spider):
                 
         data = AgodaItem()
 
-        time_data = TimeItem()
-        time_data['comment'] = comment_date
-        time_data['checkin'] = living_date
-        time_data['response'] = response_time
-
         data['hotel_id'] = self.id
+        data['comment_id'] = comment_id
         data['locale'] = customer_loc
         data['approve_number'] = approve_num
         data['rating'] = star
         data['title'] = comment_title
         data['text'] = comment_body
-        data['time'] = time_data
+        data['comment_date'] = comment_date
+        data['checkin_date'] = living_date
+        data['response_date'] = response_time
+        data['response_body'] = response_body
         data['trip_type'] = trip_type
         data['room_type'] = room_type
-        data['response_body'] = response_body
+        
         
         yield data

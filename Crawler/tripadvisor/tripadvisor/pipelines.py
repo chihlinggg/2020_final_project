@@ -7,13 +7,13 @@
 
 import os
 import json
-from agoda.items import AgodaItem
+
 from pathlib import Path
 from datetime import datetime
-class AgodaPipeline(object):
+
+class TripadvisorPipeline(object):
     def process_item(self, item, spider):
         return item
-
 class JSONPipeline(object):
     def open_spider(self, spider):
         self.start_crawl_datetime = datetime.now().strftime('%Y%m%dT%H:%M:%S')
@@ -36,30 +36,20 @@ class JSONPipeline(object):
         self._first_item = True
 
     def process_item(self, item, spider):
-         
-
         # 把資料轉成字典格式並寫入文件中
         if not isinstance(item, dict):
             item = dict(item)
-        
-        new_item = item.copy()
-        del new_item['comment_date']
-        del new_item['checkin_date']
-        del new_item['response_date']
-        new_item.update({'time':{}})
-        new_item['time'].update({'comment':item['comment_date'],'checkin':item['checkin_date'],'response':item['response_date']})
-        new_item.update({'labels':{}})
 
         if self._first_item:
             self._first_item = False
         else:
             self.runtime_file.write(',\n')
 
-        self.runtime_file.write(json.dumps(new_item, ensure_ascii=False))
-        return new_item
+        self.runtime_file.write(json.dumps(item, ensure_ascii=False))
+        return item
 
     def close_spider(self, spider):
-        self.end_crawl_datetime = datetime.now().strftime('%Y%m%d%H%M%S')
+        self.end_crawl_datetime = datetime.now().strftime('%Y%m%dT%H:%M:%S')
 
         # 儲存 JSON 格式
         self.runtime_file.write('\n]')
@@ -68,8 +58,8 @@ class JSONPipeline(object):
         # 將暫存檔改為以日期為檔名的格式
         self.store_file_path = self.dir_path / '{}-{}.json'.format(self.start_crawl_datetime,self.end_crawl_datetime)
         # 以爬蟲的 board name + 日期當作存檔檔名
-        if spider.name == 'agoda' and spider.id:
-            self.store_file_path = self.dir_path / '{}-{}.json'.format(spider.id,datetime.now().strftime('%Y%m%d%H%M%S'))
+        if spider.name == 'tripadvisor' :
+            self.store_file_path = self.dir_path / '{datetime}.json'.format(datetime=datetime.now().strftime('%Y%m%d%H%M%S'))
 
         self.store_file_path = str(self.store_file_path)
         os.rename(self.runtime_file_path, self.store_file_path)

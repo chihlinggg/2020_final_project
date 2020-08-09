@@ -34,18 +34,18 @@ class BookingSpider(scrapy.Spider):
         print('Error - {} is not available to access'.format(response.url))
         return
 
-      # 旅館名字
-      hotel_name = re.split('&pagename=|&r_lang',response.url)[1]
-        
        # 將網頁回應的 HTML 傳入 BeautifulSoup 解析器, 方便我們根據標籤 (tag) 資訊去過濾尋找
       soup = BeautifulSoup(response.text, 'lxml')
-      data = BookingItem()
+      
+      comments = soup.find_all('li',class_='review_list_new_item_block')
 
-      comments = soup.find_all(class_="c-review-block")
       for comment in comments:
+        # 評論id
+        
+        print(comment.get('data-review-url'))
         # 住客名字
-        if comment.find(class_="bui-avatar-block__title"):
-          customer_name = comment.find(class_="bui-avatar-block__title").text
+        if comment.get('data-review-url'):
+          customer_name = comment.get('data-review-url')
         else:
           customer_name = ''
 
@@ -93,8 +93,9 @@ class BookingSpider(scrapy.Spider):
             living_date = comment.find_all(class_="c-review-block__date")[1].text.strip().replace(' ','').replace('年','/').replace('月','')
           else:
             living_date = ''
-        
-        data['Hotel_name'] = hotel_name
+
+        data = BookingItem()
+        data['Hotel_name'] = self.id
         data['Customer_name'] = customer_name
         data['Customer_location'] = customer_location
         data['Star'] = star

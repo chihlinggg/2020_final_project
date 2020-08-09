@@ -9,13 +9,13 @@ import scrapy
 
 
 class BookingItem(scrapy.Item):
-    Hotel_name = scrapy.Field()
-    Customer_name = scrapy.Field()
-    Customer_location = scrapy.Field()
+    hotel_name = scrapy.Field()
+    comment_id = scrapy.Field()
+    customer_location = scrapy.Field()
     Star = scrapy.Field()
-    Comment_date = scrapy.Field()
-    Comment_title = scrapy.Field()
-    Comment_body = scrapy.Field()
-    Room_type = scrapy.Field()
-    Living_date = scrapy.Field()
+    comment_date = scrapy.Field()
+    comment_title = scrapy.Field()
+    comment_body = scrapy.Field()
+    room_type = scrapy.Field()
+    living_date = scrapy.Field()
     pass
