@@ -43,16 +43,22 @@ class JSONPipeline(object):
         if not isinstance(item, dict):
             item = dict(item)
 
+        new_item = item.copy()
+        del new_item['comment_date']
+        new_item.update({'time':{}})
+        new_item['time'].update({'comment':item['comment_date']})
+        new_item.update({'labels':{}})
+
         if self._first_item:
             self._first_item = False
         else:
             self.runtime_file.write(',\n')
 
-        self.runtime_file.write(json.dumps(item, ensure_ascii=False))
-        return item
+        self.runtime_file.write(json.dumps(new_item, ensure_ascii=False))
+        return new_item
 
     def close_spider(self, spider):
-        self.end_crawl_datetime = datetime.now().strftime('%Y%m%dT%H:%M:%S')
+        self.end_crawl_datetime = datetime.now().strftime('%Y%m%d%H%M%S')
 
         # 儲存 JSON 格式
         self.runtime_file.write('\n]')
@@ -62,7 +68,7 @@ class JSONPipeline(object):
         self.store_file_path = self.dir_path / '{}-{}.json'.format(self.start_crawl_datetime,self.end_crawl_datetime)
         # 以爬蟲的 board name + 日期當作存檔檔名
         if spider.name == 'hotels' and spider.id:
-            self.store_file_path = self.dir_path / '{id}-{datetime}.json'.format(id=spider.id,datetime=datetime.now().strftime('%Y%m%dT%H:%M:%S'))
+            self.store_file_path = self.dir_path / '{id}-{datetime}.json'.format(id=spider.id,datetime=datetime.now().strftime('%Y%m%d%H%M%S'))
 
         self.store_file_path = str(self.store_file_path)
         os.rename(self.runtime_file_path, self.store_file_path)

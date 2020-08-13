@@ -26,8 +26,8 @@ class Run_Spider_From_SubClass:
 
 def main():
     # 君悅,凱撒,圓山,大倉久和,W,晶華,老爺,君品,香格里拉,喜來登
-    target_id = [120725,113094,143924,415060,369485,121325,126702,352321,134169,105536]
-    
+    #target_id = [120725,113094,143924,415060,369485,121325,126702,352321,134169,105536]
+    target_id = [120725,113094]
     runner = Run_Spider_From_SubClass(target_id)
     runner.run_spider_in_loop()
         

@@ -9,12 +9,13 @@ import scrapy
 
 
 class HotelsItem(scrapy.Item):
-    Hotel_id = scrapy.Field()
-    Trip_type = scrapy.Field()
-    Comment_date = scrapy.Field()
-    Customer_name = scrapy.Field()
-    Customer_location = scrapy.Field()
-    Star = scrapy.Field()
-    Comment_title = scrapy.Field()
-    Comment_body = scrapy.Field()
+
+    hotel_id = scrapy.Field()
+    comment_id = scrapy.Field()
+    trip_type = scrapy.Field()
+    comment_date = scrapy.Field()
+    locale = scrapy.Field()
+    rating = scrapy.Field()
+    title = scrapy.Field()
+    text = scrapy.Field()
     pass

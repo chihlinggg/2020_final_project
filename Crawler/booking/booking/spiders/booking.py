@@ -41,13 +41,10 @@ class BookingSpider(scrapy.Spider):
 
       for comment in comments:
         # 評論id
-        
-        print(comment.get('data-review-url'))
-        # 住客名字
         if comment.get('data-review-url'):
-          customer_name = comment.get('data-review-url')
+          comment_id = comment.get('data-review-url')
         else:
-          customer_name = ''
+          comment_id = ''
 
         # 住客地點
         if comment.find(class_="bui-avatar-block__subtitle"):
@@ -95,14 +92,14 @@ class BookingSpider(scrapy.Spider):
             living_date = ''
 
         data = BookingItem()
-        data['Hotel_name'] = self.id
-        data['Customer_name'] = customer_name
-        data['Customer_location'] = customer_location
-        data['Star'] = star
-        data['Comment_date'] = comment_date
-        data['Comment_title'] = comment_title
-        data['Comment_body'] = comment_body
-        data['Room_type'] = room_type
-        data['Living_date'] = living_date
+        data['hotel_id'] = self.id
+        data['comment_id'] = comment_id
+        data['locale'] = customer_location
+        data['rating'] = star
+        data['comment_date'] = comment_date
+        data['title'] = comment_title
+        data['text'] = comment_body
+        data['room_type'] = room_type
+        data['checkin_date'] = living_date
 
         yield data

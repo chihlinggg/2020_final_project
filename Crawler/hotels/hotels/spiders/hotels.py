@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlparse
 from pathlib import Path
 import time
 import json
+import math
 
 class HotelsSpider(scrapy.Spider):
     name = 'hotels'
@@ -15,27 +16,37 @@ class HotelsSpider(scrapy.Spider):
       super().__init__()
 
     def start_requests(self):
-      for page in range(1,2):
-        url = 'https://tw.hotels.com/ho{}-tr-p{}?ajax=true&ajax=true&reviewTab=brand-reviews&ajax=true'.format(self.id,page)
-        yield scrapy.Request(url=url, callback=self.parse)
+      url = 'https://tw.hotels.com/ho{}-tr-p0?ajax=true&ajax=true&reviewTab=brand-reviews&ajax=true'.format(self.id)
+      yield scrapy.Request(url=url, callback=self.parse)
         
     def parse(self, response):
+      json_response = json.loads(response.text)
+      last_page= math.ceil(int(json_response['data']['common']['injected_data']['commonDataBlock']['property']['numTotalReviews'])/50)
+      for page in range(1,last_page+1):
+        new_url = 'https://tw.hotels.com/ho{}-tr-p{}?ajax=true&ajax=true&reviewTab=brand-reviews&ajax=true'.format(self.id,page)
+        yield scrapy.Request(url=new_url, callback=self.parse_article)
+    
+    def parse_article(self, response):
       # 假設網頁回應不是 200 OK 的話, 我們視為傳送請求失敗
       if response.status != 200:
         print('Error - {} is not available to access'.format(response.url))
         return
 
       data = HotelsItem()
-      jsonresponse = json.loads(response.text)
+      json_response = json.loads(response.text)
       # 旅館名字(id)
-
-      hotel_id = jsonresponse['data']['common']['injected_data']['commonDataBlock']['property']['hotelId']
       
-      items = jsonresponse['data']['body']['reviewContent']['reviews']['hermes']['groups'][0]['items']
+      items = json_response['data']['body']['reviewContent']['reviews']['hermes']['groups'][0]['items']
 
       for item in items:
         if item['genuineMsg'] == 'Hotels.com 真實旅客評語':
           
+          # 評論id
+          if item['itineraryId']:
+            comment_id = item['itineraryId']
+          else:
+            comment_id = ''
+
           # 旅行類型
           if item['tripType']:
             trip_type = item['tripType']
@@ -48,12 +59,6 @@ class HotelsSpider(scrapy.Spider):
           else:
             comment_date = ''
           
-          # 住客名字
-          if item['reviewer']['name']:
-            customer_name = item['reviewer']['name']
-          else:
-            customer_name = ''
-
           # 住客地點
           if item['reviewer']['locality']:
             customer_location = item['reviewer']['locality']
@@ -78,14 +83,14 @@ class HotelsSpider(scrapy.Spider):
           else:
             comment_body = ''
           
-          data['Hotel_id'] = hotel_id
-          data['Trip_type'] = trip_type
-          data['Comment_date'] = comment_date
-          data['Customer_name'] = customer_name
-          data['Customer_location'] = customer_location
-          data['Star'] = star
-          data['Comment_title'] = comment_title
-          data['Comment_body'] = comment_body
+          data['hotel_id'] = self.id
+          data['comment_id'] = comment_id
+          data['trip_type'] = trip_type
+          data['comment_date'] = comment_date
+          data['locale'] = customer_location
+          data['rating'] = star
+          data['title'] = comment_title
+          data['text'] = comment_body
 
           yield data
         else:
