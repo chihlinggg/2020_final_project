@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for hotels project
+# Scrapy settings for hotel_mix project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -9,14 +9,14 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'hotels'
+BOT_NAME = 'hotel_mix'
 
-SPIDER_MODULES = ['hotels.spiders']
-NEWSPIDER_MODULE = 'hotels.spiders'
+SPIDER_MODULES = ['hotel_mix.spiders']
+NEWSPIDER_MODULE = 'hotel_mix.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'hotels (+http://www.yourdomain.com)'
+#USER_AGENT = 'hotel_mix (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -47,13 +47,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    'hotels.middlewares.HotelsSpiderMiddleware': 543,
+#    'hotel_mix.middlewares.HotelMixSpiderMiddleware': 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    'hotels.middlewares.HotelsDownloaderMiddleware': 543,
+#    'hotel_mix.middlewares.HotelMixDownloaderMiddleware': 543,
 #}
 
 # Enable or disable extensions
@@ -65,8 +65,8 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'hotels.pipelines.HotelsPipeline': 100,
-    'hotels.pipelines.JSONPipeline': 200
+    #'hotel_mix.pipelines.HotelMixPipeline': 300,
+    'hotel_mix.pipelines.JSONPipeline': 200
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
