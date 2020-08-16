@@ -14,6 +14,12 @@ BOT_NAME = 'hotels'
 SPIDER_MODULES = ['hotels.spiders']
 NEWSPIDER_MODULE = 'hotels.spiders'
 
+MONGO_HOST = "127.0.0.1"  # 主機IP  
+MONGO_PORT = 27017  # port 
+MONGO_DB = "test"  # 資料庫 
+#MONGO_COLL = "scrapy"  # collection名  
+MONGO_USER = "root" #帳號  
+MONGO_PSW = "tu3@49cgjw" #密碼
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'hotels (+http://www.yourdomain.com)'

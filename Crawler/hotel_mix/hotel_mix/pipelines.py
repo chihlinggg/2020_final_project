@@ -9,10 +9,56 @@ import os
 import json
 from pathlib import Path
 from datetime import datetime
+from scrapy.exceptions import DropItem
+import pymongo  
+from scrapy.conf import settings 
 
-class HotelMixPipeline(object):
+class ItemPipeline(object):
     def process_item(self, item, spider):
-        return item
+        # 把資料轉成字典格式
+        if not isinstance(item, dict):
+            item = dict(item)
+        # 轉結構
+        new_item = item.copy()
+        del new_item['comment_date']
+        new_item.update({'time':{}})
+        new_item['time'].update({'comment':item['comment_date']})
+        new_item.update({'labels':{}})
+        return new_item
+
+class MongoDBPipeline(object):
+    def __init__(self,spider):  
+        # 需要權限登入方法："mongodb://用户名:密码@host:post/"
+        # client = pymongo.MongoClient('mongodb://root:root@localhost:27017/')
+
+        # 連接資料庫
+        self.client = pymongo.MongoClient(host=settings['MONGO_HOST'], port=settings['MONGO_PORT'])  
+        self.db = client[settings['MONGO_DB']]  # 資料庫
+        self.coll = self.db[spider.name]  # collection  
+        self.db.authenticate(settings['MONGO_USER'], settings['MONGO_PSW']) # 登入 
+
+    def open_spider(self, spider):
+        # 取得資料庫已有的評論
+        myquery = { "hotel_id": spider.id }
+        mydoc = self.coll.find(myquery)
+        self.record = []
+        for com_id in mydoc:
+            self.record.append(com_id['comment_id'])
+
+    def process_item(self, item, spider):
+        if item['comment_id'] not in self.record:
+            self.insert_article(item)
+            return item
+        else:
+            raise DropItem('Already have %s' % item)
+
+    def insert_article(self, item):
+        item = dict(item)
+        self.coll.insert_one(item)
+
+    def close_spider(self, spider):
+        self.client.close()
+
 
 class JSONPipeline(object):
     def open_spider(self, spider):
@@ -20,7 +66,7 @@ class JSONPipeline(object):
 
         # 在開始爬蟲的時候建立暫時的 JSON 檔案
         # 避免有多筆爬蟲結果的時候，途中發生錯誤導致程式停止會遺失所有檔案
-        self.dir_path = Path(__file__).resolve().parents[1] / 'crawled_data'
+        self.dir_path = Path(__file__).resolve().parents[1] / 'crawled_data' / spider.name
         self.runtime_file_path = str(self.dir_path / '.tmp.json.swp')
         if not self.dir_path.exists():
             self.dir_path.mkdir(parents=True)
@@ -36,40 +82,21 @@ class JSONPipeline(object):
         self._first_item = True
 
     def process_item(self, item, spider):
-         
-
-        # 把資料轉成字典格式並寫入文件中
-        if not isinstance(item, dict):
-            item = dict(item)
-        
-        new_item = item.copy()
-        del new_item['comment_date']
-        del new_item['checkin_date']
-        del new_item['response_date']
-        new_item.update({'time':{}})
-        new_item['time'].update({'comment':item['comment_date'],'checkin':item['checkin_date'],'response':item['response_date']})
-        new_item.update({'labels':{}})
-
         if self._first_item:
             self._first_item = False
         else:
             self.runtime_file.write(',\n')
 
-        self.runtime_file.write(json.dumps(new_item, ensure_ascii=False))
-        return new_item
+        self.runtime_file.write(json.dumps(item, ensure_ascii=False))
+        return item
 
     def close_spider(self, spider):
-        self.end_crawl_datetime = datetime.now().strftime('%Y%m%d%H%M%S')
-
         # 儲存 JSON 格式
         self.runtime_file.write('\n]')
         self.runtime_file.close()
-        
-        # 將暫存檔改為以日期為檔名的格式
-        self.store_file_path = self.dir_path / '{}-{}.json'.format(self.start_crawl_datetime,self.end_crawl_datetime)
+    
         # 以爬蟲的 board name + 日期當作存檔檔名
-        if spider.name == 'agoda' and spider.id:
-            self.store_file_path = self.dir_path / '{}-{}.json'.format(spider.id,datetime.now().strftime('%Y%m%d%H%M%S'))
+        self.store_file_path = self.dir_path / '{id}-{datetime}.json'.format(id=spider.id,datetime=datetime.now().strftime('%Y%m%d%H%M%S'))
 
         self.store_file_path = str(self.store_file_path)
         os.rename(self.runtime_file_path, self.store_file_path)

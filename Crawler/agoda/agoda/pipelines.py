@@ -20,7 +20,7 @@ class JSONPipeline(object):
 
         # 在開始爬蟲的時候建立暫時的 JSON 檔案
         # 避免有多筆爬蟲結果的時候，途中發生錯誤導致程式停止會遺失所有檔案
-        self.dir_path = Path(__file__).resolve().parents[1] / 'crawled_data'
+        self.dir_path = Path(__file__).resolve().parents[1] / 'crawled_data' / spider.name
         self.runtime_file_path = str(self.dir_path / '.tmp.json.swp')
         if not self.dir_path.exists():
             self.dir_path.mkdir(parents=True)

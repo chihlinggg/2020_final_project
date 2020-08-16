@@ -7,10 +7,11 @@
 
 import os
 import json
-
 from pathlib import Path
 from datetime import datetime
 from scrapy.exceptions import DropItem
+import pymongo  
+from scrapy.conf import settings 
 
 class ItemPipeline(object):
     def process_item(self, item, spider):
@@ -28,28 +29,37 @@ class ItemPipeline(object):
 
 class MongoDBPipeline(object):
     
+    def __init__(self,spider):  
+        # 需要權限登入方法："mongodb://用户名:密码@host:post/"
+        # client = pymongo.MongoClient('mongodb://root:root@localhost:27017/')
+
+        # 連接資料庫
+        self.client = pymongo.MongoClient(host=settings['MONGO_HOST'], port=settings['MONGO_PORT'])  
+        self.db = client[settings['MONGO_DB']]  # 資料庫
+        self.coll = self.db[spider.name]  # collection  
+        self.db.authenticate(settings['MONGO_USER'], settings['MONGO_PSW']) # 登入 
+
     def open_spider(self, spider):
-        # db_uri = spider.settings.get('MONGODB_URI', 'mongodb://localhost:27017')
-        # db_name = spider.settings.get('MONGODB_DB_NAME', 'ptt_scrapy')
-        # self.db_client = MongoClient('mongodb://localhost:27017')
-        # self.db = self.db_client[db_name]
-        with open('record.json', 'r') as f:
-            self.record = json.load(f)
+
+        myquery = { "hotel_id": spider.id }
+        mydoc = self.coll.find(myquery)
+        self.record = []
+        for com_id in mydoc:
+            self.record.append(com_id['comment_id'])
 
     def process_item(self, item, spider):
-        # self.insert_article(item)
         if item['comment_id'] not in self.record:
+            self.insert_article(item)
             return item
         else:
             raise DropItem('Already have %s' % item)
 
+    def insert_article(self, item):
+        item = dict(item)
+        self.coll.insert_one(item)
 
-    # def insert_article(self, item):
-    #     item = dict(item)
-    #     self.db.article.insert_one(item)
-
-    # def close_spider(self, spider):
-    #     self.db_clients.close()
+    def close_spider(self, spider):
+        self.client.close()
 
 
 class JSONPipeline(object):
