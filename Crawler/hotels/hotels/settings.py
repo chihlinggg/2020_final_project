@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'hotels.spiders'
 #USER_AGENT = 'hotels (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -65,7 +65,8 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'hotels.pipelines.HotelsPipeline': 100,
+    'hotels.pipelines.ItemPipeline': 100,
+    'hotels.pipelines.MongoDBPipeline': 200,
     'hotels.pipelines.JSONPipeline': 200
 }
 
