@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime
 from scrapy.exceptions import DropItem
 import pymongo  
-from scrapy.conf import settings 
+#from scrapy.conf import settings 
 
 class ItemPipeline(object):
     def process_item(self, item, spider):
@@ -28,19 +28,14 @@ class ItemPipeline(object):
         return new_item
 
 class MongoDBPipeline(object):
-    
-    def __init__(self,spider):  
-        # 需要權限登入方法："mongodb://用户名:密码@host:post/"
-        # client = pymongo.MongoClient('mongodb://root:root@localhost:27017/')
-
-        # 連接資料庫
-        self.client = pymongo.MongoClient(host=settings['MONGO_HOST'], port=settings['MONGO_PORT'])  
-        self.db = client[settings['MONGO_DB']]  # 資料庫
-        self.coll = self.db[spider.name]  # collection  
-        self.db.authenticate(settings['MONGO_USER'], settings['MONGO_PSW']) # 登入 
 
     def open_spider(self, spider):
-
+        # 連接資料庫
+        self.client = pymongo.MongoClient(host='127.0.0.1', port=27017)  
+        self.db = client['test']  # 資料庫
+        self.coll = self.db[spider.name]  # collection  
+        self.db.authenticate('root', 'tu3@49cgjw') # 登入 
+        
         myquery = { "hotel_id": spider.id }
         mydoc = self.coll.find(myquery)
         self.record = []

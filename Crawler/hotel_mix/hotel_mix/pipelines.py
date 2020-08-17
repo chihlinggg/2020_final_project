@@ -11,7 +11,8 @@ from pathlib import Path
 from datetime import datetime
 from scrapy.exceptions import DropItem
 import pymongo  
-from scrapy.conf import settings 
+from urllib import parse
+#from scrapy.conf import settings 
 
 class ItemPipeline(object):
     def process_item(self, item, spider):
@@ -21,25 +22,23 @@ class ItemPipeline(object):
         # 轉結構
         new_item = item.copy()
         del new_item['comment_date']
+        del new_item['checkin_date']
+        del new_item['response_date']
         new_item.update({'time':{}})
-        new_item['time'].update({'comment':item['comment_date']})
+        new_item['time'].update({'comment':item['comment_date'],'checkin':item['checkin_date'],'response':item['response_date']})
         new_item.update({'labels':{}})
         return new_item
 
 class MongoDBPipeline(object):
-    def __init__(self,spider):  
-        # 需要權限登入方法："mongodb://用户名:密码@host:post/"
-        # client = pymongo.MongoClient('mongodb://root:root@localhost:27017/')
-
-        # 連接資料庫
-        self.client = pymongo.MongoClient(host=settings['MONGO_HOST'], port=settings['MONGO_PORT'])  
-        self.db = client[settings['MONGO_DB']]  # 資料庫
-        self.coll = self.db[spider.name]  # collection  
-        self.db.authenticate(settings['MONGO_USER'], settings['MONGO_PSW']) # 登入 
 
     def open_spider(self, spider):
+        user = parse.quote_plus("root")
+        passwd = parse.quote_plus("tu3@49cgjw")
+        self.client = pymongo.MongoClient('mongodb://{}:{}@localhost:27017/'.format(user,passwd))
+        self.db = self.client['test']
+        self.coll = self.db[spider.name]
         # 取得資料庫已有的評論
-        myquery = { "hotel_id": spider.id }
+        myquery = { 'hotel_id': spider.id }
         mydoc = self.coll.find(myquery)
         self.record = []
         for com_id in mydoc:

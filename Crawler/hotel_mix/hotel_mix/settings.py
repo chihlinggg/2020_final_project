@@ -14,13 +14,6 @@ BOT_NAME = 'hotel_mix'
 SPIDER_MODULES = ['hotel_mix.spiders']
 NEWSPIDER_MODULE = 'hotel_mix.spiders'
 
-MONGO_HOST = "127.0.0.1"  # 主機IP  
-MONGO_PORT = 27017  # port 
-MONGO_DB = "test"  # 資料庫 
-#MONGO_COLL = "scrapy"  # collection名  
-MONGO_USER = "root" #帳號  
-MONGO_PSW = "tu3@49cgjw" #密碼
-
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'hotel_mix (+http://www.yourdomain.com)'
@@ -73,7 +66,7 @@ ROBOTSTXT_OBEY = False
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'hotel_mix.pipelines.ItemPipeline': 100,
-    #'hotel_mix.pipelines.MongoDBPipeline': 200,
+    'hotel_mix.pipelines.MongoDBPipeline': 200,
     'hotel_mix.pipelines.JSONPipeline': 300
 }
 

@@ -90,6 +90,9 @@ class BookingSpider(scrapy.Spider):
             living_date = comment.find_all(class_="c-review-block__date")[1].text.strip().replace(' ','').replace('年','/').replace('月','')
           else:
             living_date = ''
+        else:
+          room_type = ''
+          living_date = ''
 
         data = HotelMixItem()
 
