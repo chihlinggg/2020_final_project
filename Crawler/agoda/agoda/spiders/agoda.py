@@ -8,13 +8,14 @@ from pathlib import Path
 import time
 import json
 import math
+import random
 
 class AgodaSpider(scrapy.Spider):
     name = 'agoda'
     def __init__(self,id):
       self.id = id
       self.headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36',
+            #'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36'
             'Content-Type': 'application/json'
         }
       self.start_urls = 'https://www.agoda.com/NewSite/zh-tw/Review/ReviewComments'
@@ -27,8 +28,10 @@ class AgodaSpider(scrapy.Spider):
     def parse(self, response):
       soup = BeautifulSoup(response.text, 'lxml')
       last_page = math.ceil(int(soup.find('div',class_='hotelreview-detail-item').get('data-totalindex'))/20)
+      print (soup.find('div',class_='hotelreview-detail-item').get('data-totalindex'))
       for page in range(1,last_page+1):
         self.payload = "{{\"hotelId\":{id},\"providerId\":332,\"demographicId\":0,\"page\":{page},\"pageSize\":20,\"sorting\":1,\"providerIds\":332,\"isReviewPage\":false,\"isCrawlablePage\":true,\"filters\":{{\"language\":[],\"room\":[]}},\"searchKeyword\":\"\",\"searchFilters\":[]}}".format(id=self.id,page=page)
+        #time.sleep(random.uniform(1,3))
         yield scrapy.Request(url=self.start_urls, callback=self.parse_article, method='POST', headers=self.headers, body=self.payload)
     
     def parse_article(self, response):

@@ -12,7 +12,7 @@ from datetime import datetime
 from scrapy.exceptions import DropItem
 import pymongo  
 from urllib import parse
-#from scrapy.conf import settings 
+import logging
 
 class ItemPipeline(object):
     def process_item(self, item, spider):

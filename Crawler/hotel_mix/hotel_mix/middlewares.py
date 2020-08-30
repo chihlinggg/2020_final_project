@@ -7,6 +7,14 @@
 
 from scrapy import signals
 
+import random
+
+# 隨機的User-Agent
+class RandomUserAgent(object):
+    def process_request(self, request, spider):
+        useragent = random.choice(USER_AGENTS)
+        request.headers.setdefault("User-Agent", useragent)
+
 
 class HotelMixSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,

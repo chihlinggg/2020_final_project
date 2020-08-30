@@ -20,7 +20,7 @@ NEWSPIDER_MODULE = 'hotel_mix.spiders'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-
+LOG_LEVEL = "ERROR"
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
@@ -52,9 +52,9 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'hotel_mix.middlewares.HotelMixDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'hotel_mix.middlewares.RandomUserAgent': 80,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
