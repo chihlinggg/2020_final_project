@@ -10,8 +10,9 @@ import scrapy
 
 class HotelMixItem(scrapy.Item):
     
-    hotel_id = scrapy.Field()
-    comment_id = scrapy.Field()
+    #hotel_name = scrapy.Field()
+    website = scrapy.Field()
+    id = scrapy.Field()
     locale = scrapy.Field()
     approve_number = scrapy.Field()
     rating = scrapy.Field()
@@ -21,5 +22,7 @@ class HotelMixItem(scrapy.Item):
     checkin_date = scrapy.Field()
     response_date = scrapy.Field()
     response_body = scrapy.Field()
-    trip_type = scrapy.Field()
+    travel_type = scrapy.Field()
     room_type = scrapy.Field()
+    condition = scrapy.Field()
+    reply = scrapy.Field()

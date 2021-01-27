@@ -17,6 +17,7 @@ class HotelsSpider(scrapy.Spider):
 
     def start_requests(self):
       url = 'https://tw.hotels.com/ho{}-tr-p0?ajax=true&ajax=true&reviewTab=brand-reviews&ajax=true'.format(self.id)
+
       yield scrapy.Request(url=url, callback=self.parse)
         
     def parse(self, response):

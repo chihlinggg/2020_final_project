@@ -10,9 +10,10 @@ import json
 import math
 
 class HotelsSpider(scrapy.Spider):
-    name = 'hotels'
-    def __init__(self,id):
+    name = 'Hotels'
+    def __init__(self,id,hotel_name):
       self.id = id
+      self.hotel_name = hotel_name
       super().__init__()
 
     def start_requests(self):
@@ -41,52 +42,62 @@ class HotelsSpider(scrapy.Spider):
         if item['genuineMsg'] == 'Hotels.com 真實旅客評語':
           
           # 評論id
-          if item['itineraryId']:
+          if item.get('itineraryId'):
             comment_id = item['itineraryId']
           else:
             comment_id = ''
 
           # 旅行類型
-          if item['tripType']:
+          if item.get('tripType'):
             trip_type = item['tripType']
           else:
             trip_type = ''
 
           # 評論日期
-          if item['reviewDate']:
+          if item.get('reviewDate'):
             comment_date = item['reviewDate'].replace('年','/').replace('月','/').replace('日','')
           else:
             comment_date = ''
           
           # 住客地點
-          if item['reviewer']['locality']:
+          if item.get('reviewer'):
             customer_location = item['reviewer']['locality']
           else:
             customer_location = ''
 
           # 星星
-          if item['rating']:
+          if item.get('rating'):
             star = item['rating']
           else:
             star = ''
           
           # 評論標題
-          if item['summary']:
+          if item.get('summary'):
             comment_title = item['summary']
           else:
             comment_title = ''
 
           # 評論內容
-          if item['description']:
+          if item.get('description'):
             comment_body = item['description']
           else:
             comment_body = ''
 
-          data = HotelMixItem()
+          # 回覆內容
+          if item.get('response'):
+            response_body = item['response']['text'].strip()
+            condition = '2'
+            reply = '1'
+          else:
+            response_body = ''
+            condition = '0'
+            reply = '0'
 
-          data['hotel_id'] = self.id
-          data['comment_id'] = comment_id
-          data['trip_type'] = trip_type
+          data = HotelMixItem()
+          
+          data['website'] = self.name
+          data['id'] = comment_id
+          data['travel_type'] = trip_type
           data['comment_date'] = comment_date
           data['locale'] = customer_location
           data['rating'] = star
@@ -95,9 +106,10 @@ class HotelsSpider(scrapy.Spider):
           data['approve_number'] = ''
           data['checkin_date'] = ''
           data['response_date'] = ''
-          data['response_body'] = ''
+          data['response_body'] = response_body
           data['room_type'] = ''
-
+          data['condition'] = condition
+          data['reply'] = reply
           yield data
         else:
           pass

@@ -8,9 +8,10 @@ from pathlib import Path
 import time
 
 class BookingSpider(scrapy.Spider):
-    name = 'booking'
-    def __init__(self,id):
+    name = 'Booking'
+    def __init__(self,id,hotel_name):
       self.id = id
+      self.hotel_name = hotel_name
       self.headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36','Content-Type': 'application/json'
       }
@@ -94,10 +95,20 @@ class BookingSpider(scrapy.Spider):
           room_type = ''
           living_date = ''
 
+        # 回覆內容
+        if comment.find_all(class_="c-review-block__response__body"):
+          response_body = comment.find_all(class_="c-review-block__response__body")[-1].text.strip()
+          reply = '1'
+          condition = '2'
+        else:
+          response_body = ''
+          reply = '0'
+          condition = '0'
+
         data = HotelMixItem()
 
-        data['hotel_id'] = self.id
-        data['comment_id'] = comment_id
+        data['website'] = self.name
+        data['id'] = comment_id
         data['locale'] = customer_location
         data['rating'] = star
         data['comment_date'] = comment_date
@@ -107,7 +118,8 @@ class BookingSpider(scrapy.Spider):
         data['checkin_date'] = living_date
         data['approve_number'] = ''
         data['response_date'] = ''
-        data['response_body'] = ''
-        data['trip_type'] = ''
-        
+        data['response_body'] = response_body
+        data['travel_type'] = ''
+        data['condition'] = condition
+        data['reply'] = reply
         yield data

@@ -15,7 +15,7 @@ class AgodaSpider(scrapy.Spider):
     def __init__(self,id):
       self.id = id
       self.headers = {
-            #'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36'
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36'
             'Content-Type': 'application/json'
         }
       self.start_urls = 'https://www.agoda.com/NewSite/zh-tw/Review/ReviewComments'

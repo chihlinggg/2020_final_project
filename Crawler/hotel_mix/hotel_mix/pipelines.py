@@ -16,6 +16,8 @@ import logging
 
 class ItemPipeline(object):
     def process_item(self, item, spider):
+        item['condition'] = int(item['condition'])
+        item['reply'] = int(item['reply'])
         # 把資料轉成字典格式
         if not isinstance(item, dict):
             item = dict(item)
@@ -24,32 +26,36 @@ class ItemPipeline(object):
         del new_item['comment_date']
         del new_item['checkin_date']
         del new_item['response_date']
-        new_item.update({'time':{}})
-        new_item['time'].update({'comment':item['comment_date'],'checkin':item['checkin_date'],'response':item['response_date']})
+        del new_item['reply']
+        del new_item['condition']
+        new_item.update({'times':{}})
+        new_item['times'].update({'comment':item['comment_date'],'checkin':item['checkin_date'],'response':item['response_date']})
         new_item.update({'labels':{}})
+        new_item['labels'].update({'condition':item['condition'],'reply':item['reply']})
+
         return new_item
 
 class MongoDBPipeline(object):
 
     def open_spider(self, spider):
-        user = parse.quote_plus("root")
-        passwd = parse.quote_plus("tu3@49cgjw")
+        user = parse.quote_plus("myUserAdmin")
+        passwd = parse.quote_plus("b83m33pE")
         self.client = pymongo.MongoClient('mongodb://{}:{}@localhost:27017/'.format(user,passwd))
-        self.db = self.client['test']
-        self.coll = self.db[spider.name]
+        self.db = self.client['HotelComments']
+        self.coll = self.db[spider.hotel_name]
         # 取得資料庫已有的評論
-        myquery = { 'hotel_id': spider.id }
+        myquery = { 'website': spider.name }
         mydoc = self.coll.find(myquery)
         self.record = []
         for com_id in mydoc:
-            self.record.append(com_id['comment_id'])
+            self.record.append(com_id['id'])
 
     def process_item(self, item, spider):
-        if item['comment_id'] not in self.record:
+        if item['id'] not in self.record:
             self.insert_article(item)
             return item
         else:
-            raise DropItem('Already have %s' % item)
+            raise DropItem()
 
     def insert_article(self, item):
         item = dict(item)
@@ -57,7 +63,7 @@ class MongoDBPipeline(object):
 
     def close_spider(self, spider):
         self.client.close()
-
+        logging.info('!!!!!!!!!! %s-%s finish!!!!!!!!!!',spider.name,spider.hotel_name)
 
 class JSONPipeline(object):
     def open_spider(self, spider):
@@ -65,7 +71,7 @@ class JSONPipeline(object):
 
         # 在開始爬蟲的時候建立暫時的 JSON 檔案
         # 避免有多筆爬蟲結果的時候，途中發生錯誤導致程式停止會遺失所有檔案
-        self.dir_path = Path(__file__).resolve().parents[1] / 'crawled_data' / spider.name
+        self.dir_path = Path(__file__).resolve().parents[1] / 'crawled_data' / spider.hotel_name
         self.runtime_file_path = str(self.dir_path / '.tmp.json.swp')
         if not self.dir_path.exists():
             self.dir_path.mkdir(parents=True)
@@ -95,7 +101,7 @@ class JSONPipeline(object):
         self.runtime_file.close()
     
         # 以爬蟲的 board name + 日期當作存檔檔名
-        self.store_file_path = self.dir_path / '{id}-{datetime}.json'.format(id=spider.id,datetime=datetime.now().strftime('%Y%m%d%H%M%S'))
+        self.store_file_path = self.dir_path / '{website}-{datetime}.json'.format(website=spider.name,datetime=datetime.now().strftime('%Y%m%d'))
 
         self.store_file_path = str(self.store_file_path)
         os.rename(self.runtime_file_path, self.store_file_path)

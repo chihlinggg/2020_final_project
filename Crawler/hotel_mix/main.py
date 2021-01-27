@@ -6,10 +6,10 @@ from scrapy.utils.log import configure_logging
 from twisted.internet import reactor, defer
 import logging
 from datetime import datetime
-today = datetime.now()
-log_file_path = "/home/chihling/hotel_mix/log/{}_{}_{}.log".format(today.year, today.month, today.day)
-FORMAT = '%(asctime)s %(levelname)s: %(message)s'
-logging.basicConfig(level=logging.DEBUG, filename=log_file_path, filemode='a', format=FORMAT)
+#today = datetime.now()
+#log_file_path = "/home/chihling/hotel_mix/log/{}_{}_{}.log".format(today.year, today.month, today.day)
+#FORMAT = '%(asctime)s %(levelname)s: %(message)s'
+#logging.basicConfig(level=logging.DEBUG, filename=log_file_path, filemode='a', format=FORMAT)
 
 class Run_Spider_From_SubClass:
 
@@ -22,9 +22,9 @@ class Run_Spider_From_SubClass:
 
     @defer.inlineCallbacks
     def crawl(self):
-        for i,crawl_ in enumerate(self.crawl_list):
-          for id in self.id_list[i]:
-            yield self.runner.crawl(crawl_, id=id)
+        for crawl_ in self.crawl_list:
+          for id in range(0,10):
+            yield self.runner.crawl(crawl_, id=self.id_list[id][crawl_], hotel_name=self.id_list[id]['hotel_name'])
         reactor.stop()
 
     def run_spider_in_loop(self):
@@ -32,20 +32,72 @@ class Run_Spider_From_SubClass:
         reactor.run()
 
 def main():
-    # hotels
-    # 君悅,凱撒,圓山,大倉久和,W,晶華,老爺,君品,香格里拉,喜來登
-    #target_id = [120725,113094,143924,415060,369485,121325,126702,352321,134169,105536]
+
+    target_id = [
+        {   # 君悅
+            'hotel_name':'GrandHyattTaipei',
+            'Hotels':120725,
+            'Booking':'grand-hyatt-taipei-taipei50',
+            'Agoda':736992
+        },
+        {   # 大地
+            'hotel_name':'GaiaHotelTaipei',
+            'Hotels':454171,
+            'Booking':'the-gaia-hotel',
+            'Agoda':569079
+        },
+        {   # 圓山
+            'hotel_name':'GrandHotelTaipei',
+            'Hotels':143924,
+            'Booking':'grand-hotel-taipei',
+            'Agoda':1885
+        },
+        {   # 大倉久和
+            'hotel_name':'OkuraPrestigeTaipei',
+            'Hotels':415060,
+            'Booking':'the-okura-prestige-taipei',
+            'Agoda':400142
+        },
+        {   # W
+            'hotel_name':'W_Taipei',
+            'Hotels':369485,
+            'Booking':'w-taipei',
+            'Agoda':335043
+        },
+        {   # 晶華
+            'hotel_name':'RegentTaipei',
+            'Hotels':121325,
+            'Booking':'the-regent-taipei',
+            'Agoda':5718
+        },
+        {   # 老爺
+            'hotel_name':'RoyalNikkoTaipei',
+            'Hotels':126702,
+            'Booking':'royal-taipei',
+            'Agoda':8885
+        },
+        {   # 君品
+            'hotel_name':'PalaisDeChineHotel',
+            'Hotels':352321,
+            'Booking':'palais-de-chine',
+            'Agoda':186460
+        },
+        {   # 香格里拉
+            'hotel_name':'EasternPlazaHotelTaipei',
+            'Hotels':134169,
+            'Booking':'shangri-la-s-far-eastern-plaza-taipei',
+            'Agoda':7767
+        },
+        {   # 喜來登
+            'hotel_name':'SheratonGrandTaipei',
+            'Hotels':105536,
+            'Booking':'sheraton-taipei',
+            'Agoda':149
+        }
+    ]
     
-    # booking
-    # 君悅,凱撒,圓山,大倉久和,W,晶華,老爺,君品,香格里拉,喜來登
-    #target_id = ['grand-hyatt-taipei-taipei50','caesarpark-taipei','grand-hotel-taipei','the-okura-prestige-taipei','w-taipei','the-regent-taipei','royal-taipei','palais-de-chine','shangri-la-s-far-eastern-plaza-taipei','sheraton-taipei']
-
-    # agoda
-    # 君悅,凱撒,圓山,大倉久和,W,晶華,老爺,君品,香格里拉,喜來登
-    #target_id = [736992,1368,1885,400142,335043,5718,8885,186460,7767,149]
-
-    target_id = [[120725,113094,143924,415060,369485,121325,126702,352321,134169,105536],['grand-hyatt-taipei-taipei50','caesarpark-taipei','grand-hotel-taipei','the-okura-prestige-taipei','w-taipei','the-regent-taipei','royal-taipei','palais-de-chine','shangri-la-s-far-eastern-plaza-taipei','sheraton-taipei'],[736992,1368,1885,400142,335043,5718,8885,186460,7767,149]]
-    target_crawl = ['hotels','booking','agoda']
+    #target_crawl = ['Hotels','Booking','Agoda']
+    target_crawl = ['Hotels']
     runner = Run_Spider_From_SubClass(target_id,target_crawl)
     runner.run_spider_in_loop()
         

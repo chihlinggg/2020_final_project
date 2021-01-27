@@ -10,11 +10,12 @@ import json
 import math
 
 class AgodaSpider(scrapy.Spider):
-    name = 'agoda'
-    def __init__(self,id):
+    name = 'Agoda'
+    def __init__(self,id,hotel_name):
       self.id = id
+      self.hotel_name = hotel_name
       self.headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36',
+            #'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.113 Safari/537.36',
             'Content-Type': 'application/json'
         }
       self.start_urls = 'https://www.agoda.com/NewSite/zh-tw/Review/ReviewComments'
@@ -103,8 +104,12 @@ class AgodaSpider(scrapy.Spider):
         # 回應內容
         if comment.find('span',attrs={'data-selenium':'review-response-text'}):
           response_body = comment.find('span',attrs={'data-selenium':'review-response-text'}).text.strip()
+          condition = '2'
+          reply = '1'
         else:
           response_body = ''
+          condition = '0'
+          reply = '0'
                 
         # 回應日期
         if comment.find('span',attrs={'data-selenium':'review-response-date'}):
@@ -119,9 +124,9 @@ class AgodaSpider(scrapy.Spider):
           approve_num = ''
                 
         data = HotelMixItem()
-
-        data['hotel_id'] = self.id
-        data['comment_id'] = comment_id
+        
+        data['website'] = self.name
+        data['id'] = comment_id
         data['locale'] = customer_loc
         data['approve_number'] = approve_num
         data['rating'] = star
@@ -131,7 +136,8 @@ class AgodaSpider(scrapy.Spider):
         data['checkin_date'] = living_date
         data['response_date'] = response_time
         data['response_body'] = response_body
-        data['trip_type'] = trip_type
+        data['travel_type'] = trip_type
         data['room_type'] = room_type
-        
+        data['condition'] = condition
+        data['reply'] = reply
         yield data
